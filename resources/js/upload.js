@@ -1,20 +1,16 @@
 let fileInput = $('#file');
 fileInput.on('change', (e) => {
     let formdata = new FormData();
-    let file = e.target.files[0];
-    formdata.append('file', file);
-    formdata.append('size', file.size);
-    formdata.append('type', file.type);
-
-    if (!(/image\/(jpg|jpeg|png)$/i).test(file.type)) {
-        $('p').text('invalid type');
-        return;
-    }
+    formdata.append('file', e.target.files[0]);
 
     let xhr = new XMLHttpRequest();
     xhr.open('POST', '/api/upload', true);
-    xhr.onload = () => {
-        $('p').text(file.type);
-    }
     xhr.send(formdata);
+    xhr.onload = () => {
+        console.log(JSON.parse(xhr.response).url);
+        let body = $('body');
+        let img = document.createElement('img');
+        img.src = JSON.parse(xhr.response).url;
+        body.append(img);
+    }
 });
