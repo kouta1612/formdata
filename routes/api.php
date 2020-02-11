@@ -17,4 +17,4 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-Route::post('/upload', 'Api\UploadController@upload');
+Route::post('/signature', 'Api\UploadController@signature');

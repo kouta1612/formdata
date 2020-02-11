@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Utils\Upload;
 use Illuminate\Http\Request;
 
 class UploadController extends Controller
@@ -24,17 +23,17 @@ class UploadController extends Controller
     private $signature;
     private $data;
 
-    public function policies(Request $request)
+    public function signature(Request $request)
     {
         $this->setRequest($request);
         $this->setNow(time());
         // AWS設定
-        $this->setFileKey('test');
+        $this->setFileKey($request->name);
         $this->setBucket(config('filesystems.disks.s3.bucket'));
         $this->setAccessKey(config('filesystems.disks.s3.key'));
         $this->setRegion(config('filesystems.disks.s3.region'));
         $this->setSecret(config('filesystems.disks.s3.secret'));
-        $this->setUrl('https://' . $this->bucket . '.s3.amazonaws.com');
+        $this->setUrl("https://{$this->bucket}.s3.amazonaws.com/");
         // ポリシー作成
         $this->setPolicy();
         // 署名作成
@@ -46,20 +45,10 @@ class UploadController extends Controller
         $this->setSignature();
         // POSTデータ作成
         $this->setData();
-
         return [
             'url' => $this->url,
-            'date' => $this->data
+            'data' => $this->data
         ];
-    }
-
-    public function upload(Request $request)
-    {
-        // S3にファイルをアップロード
-        $upload = new Upload('test', $request->file);
-        $upload->saveFileToS3();
-
-        return ['url' => $upload->getFilePath()];
     }
 
     private function setRequest($request)
@@ -107,14 +96,14 @@ class UploadController extends Controller
         $policyDocument = [
             'expiration' => gmdate('Y-m-d\TH:i:s.000\Z', $this->now + 60),
             'conditions' => [
-                ['bucket' => config('filesystems.disks.s3.bucket')],
+                ['bucket' => $this->bucket],
                 ['key' => $this->fileKey],
-                ['Content-Type' => $this->request->contentType],
+                ['Content-Type' => $this->request->type],
                 ['content-length-range', $this->request->size, $this->request->size],
                 ['acl' => 'public-read'],
                 ['success_action_status' => '201'],
                 ['x-amz-algorithm' => 'AWS4-HMAC-SHA256'],
-                ['x-amz-credential' => implode('/', [config('filesystems.disks.s3.key'), gmdate('Ymd', $this->now), config('filesystems.disks.s3.region'), 's3', 'aws4_request'])],
+                ['x-amz-credential' => implode('/', [$this->accessKey, gmdate('Ymd', $this->now), $this->region, 's3', 'aws4_request'])],
                 ['x-amz-date' => gmdate('Ymd\THis\Z', $this->now)]
             ]
         ];
@@ -165,7 +154,7 @@ class UploadController extends Controller
             ]),
             'x-amz-signature' => $this->signature,
             'x-amz-algorithm' => 'AWS4-HMAC-SHA256',
-            'x-amz-date' => gmdate('Ymd\THis\Z', $this->now)
+            'x-amz-date' => gmdate('Ymd\THis\Z', $this->now),
         ];
     }
 }
