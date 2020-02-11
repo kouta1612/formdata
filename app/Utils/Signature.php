@@ -1,11 +1,10 @@
 <?php
 
-namespace App\Http\Controllers\Api;
+namespace App\Utils;
 
-use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 
-class UploadController extends Controller
+class Signature
 {
     private $request;
     private $fileKey;
@@ -23,12 +22,20 @@ class UploadController extends Controller
     private $signature;
     private $data;
 
-    public function signature(Request $request)
+    public function __construct(Request $request)
     {
-        $this->setRequest($request);
+        $this->request = $request;
+    }
+
+    public function setFileKey(string $fileKey)
+    {
+        $this->fileKey = $fileKey;
+    }
+
+    public function create()
+    {
         $this->setNow(time());
         // AWS設定
-        $this->setFileKey($request->name);
         $this->setBucket(config('filesystems.disks.s3.bucket'));
         $this->setAccessKey(config('filesystems.disks.s3.key'));
         $this->setRegion(config('filesystems.disks.s3.region'));
@@ -45,20 +52,11 @@ class UploadController extends Controller
         $this->setSignature();
         // POSTデータ作成
         $this->setData();
+
         return [
             'url' => $this->url,
             'data' => $this->data
         ];
-    }
-
-    private function setRequest($request)
-    {
-        $this->request = $request;
-    }
-
-    private function setFileKey($fileKey)
-    {
-        $this->fileKey = $fileKey;
     }
 
     private function setNow($now)
