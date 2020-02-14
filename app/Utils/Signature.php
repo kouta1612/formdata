@@ -53,10 +53,7 @@ class Signature
         // POSTデータ作成
         $this->setData();
 
-        return [
-            'url' => $this->url,
-            'data' => $this->data
-        ];
+        return ['url' => $this->url, 'data' => $this->data];
     }
 
     private function setNow($now)
@@ -110,12 +107,7 @@ class Signature
 
     private function setDateKey()
     {
-        $this->dateKey = hash_hmac(
-            'sha256',
-            gmdate('Ymd', $this->now),
-            'AWS4' . $this->secret,
-            true
-        );
+        $this->dateKey = hash_hmac('sha256', gmdate('Ymd', $this->now), 'AWS4' . $this->secret, true);
     }
 
     private function setDateRegionKey()
@@ -147,9 +139,7 @@ class Signature
             'acl' => 'public-read',
             'success_action_status' => 201,
             'policy' => $this->policy,
-            'x-amz-credential' => implode('/', [
-                $this->accessKey, gmdate('Ymd', $this->now), $this->region, 's3', 'aws4_request'
-            ]),
+            'x-amz-credential' => implode('/', [$this->accessKey, gmdate('Ymd', $this->now), $this->region, 's3', 'aws4_request']),
             'x-amz-signature' => $this->signature,
             'x-amz-algorithm' => 'AWS4-HMAC-SHA256',
             'x-amz-date' => gmdate('Ymd\THis\Z', $this->now),
