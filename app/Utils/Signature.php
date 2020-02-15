@@ -94,7 +94,7 @@ class Signature
                 ['bucket' => $this->bucket],
                 ['key' => $this->fileKey],
                 ['Content-Type' => $this->request->type],
-                ['content-length-range', $this->request->size, $this->request->size],
+                // ['content-length-range', $this->request->size, $this->request->size],
                 ['acl' => 'public-read'],
                 ['success_action_status' => '201'],
                 ['x-amz-algorithm' => 'AWS4-HMAC-SHA256'],

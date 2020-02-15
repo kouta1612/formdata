@@ -13,13 +13,35 @@ fileInput.on('change', (e) => {
     }).then((response) => {
         let key;
         let formData = new FormData();
-
         for (key in response.data) {
             if (response.data.hasOwnProperty(key)) {
                 formData.append(key, response.data[key]);
             }
         }
-        formData.append('file', file);
+        // リサイズ
+        const reader = new FileReader();
+        var blob;
+        reader.onload = (e) => {
+            let image = new Image();
+            image.onload = () => {
+                let canvas = document.createElement('canvas');
+                let ctx = canvas.getContext('2d');
+                [canvas.width, canvas.height] = [image.width, image.height];
+                ctx.drawImage(image, 0, 0, image.width, image.height, 0, 0, image.width * 0.5, image.height * 0.5);
+                let base64 = canvas.toDataURL(file.type);
+                let binary = atob(base64.replace(/^.*,/, ''));
+                const buffer = new Uint8Array(binary.length);
+                for (let i = 0; i < binary.length; i++) {
+                    buffer[i] = binary.charCodeAt(i);
+                }
+                blob = new Blob([buffer.buffer], { type: file.type });
+                // console.log(blob)
+            };
+            image.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+        formData.append('file', blob);
+        console.log(blob)
         return $.ajax({
             url: response.url,
             type: 'POST',
