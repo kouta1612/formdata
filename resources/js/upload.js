@@ -4,10 +4,10 @@ $('#file').on('change', (e) => {
 });
 
 async function handle(file) {
-    // シグネチャ作成
-    const data = await signature(file);
-    // ファイルのリサイズ
-    const resizedFile = await resize(file);
+    // シグネチャ作成とリサイズを並列処理
+    const [data, resizedFile] = await Promise.all(
+        [signature(file), resize(file)]
+    );
     // シグネチャとリサイズしたファイルをs3にわたす
     const uploadedFile = await upload(data, resizedFile);
     // s3から受け取ったファイルを表示
