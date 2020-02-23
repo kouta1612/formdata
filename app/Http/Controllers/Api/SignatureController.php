@@ -11,7 +11,8 @@ class SignatureController extends Controller
     public function store(Request $request)
     {
         $signature = new Signature($request);
-        $signature->setFileKey($request->name);
+        $fileName = md5(rand()) . '.' . str_replace('image/', '', $request->type);
+        $signature->setFileKey("uploads/{$fileName}");
         $datas = $signature->create();
 
         return $datas;
