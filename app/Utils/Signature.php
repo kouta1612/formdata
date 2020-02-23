@@ -40,7 +40,7 @@ class Signature
         $this->setAccessKey(config('filesystems.disks.s3.key'));
         $this->setRegion(config('filesystems.disks.s3.region'));
         $this->setSecret(config('filesystems.disks.s3.secret'));
-        $this->setUrl("https://{$this->bucket}.s3.amazonaws.com/");
+        $this->setUrl("https://{$this->bucket}.s3.amazonaws.com");
         // ポリシー作成
         $this->setPolicy();
         // 署名作成
@@ -89,12 +89,11 @@ class Signature
     private function setPolicy()
     {
         $policyDocument = [
-            'expiration' => gmdate('Y-m-d\TH:i:s.000\Z', $this->now + 60),
+            'expiration' => gmdate('Y-m-d\TH:i:s.000\Z', $this->now + 30),
             'conditions' => [
                 ['bucket' => $this->bucket],
                 ['key' => $this->fileKey],
                 ['Content-Type' => $this->request->type],
-                // ['content-length-range', $this->request->size, $this->request->size],
                 ['acl' => 'public-read'],
                 ['success_action_status' => '201'],
                 ['x-amz-algorithm' => 'AWS4-HMAC-SHA256'],
