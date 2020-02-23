@@ -6,5 +6,5 @@
     <p class="upload__error-text"></p>
 @endsection
 @section('script')
-    <script src="/js/upload.js"></script>
+    <script src="/js/quill.js"></script>
 @endsection
